@@ -6,6 +6,12 @@ export interface Transaction {
     date: string; // ISO string
     note?: string;
   }
+
+ export type TransactionType = 'income' | 'expense';
   
-  export type TransactionType = 'income' | 'expense';
+ export interface Category {
+    id: string;
+    name: string;
+    type: 'income' | 'expense';
+  }
   

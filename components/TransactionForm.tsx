@@ -1,13 +1,25 @@
 "use client";
 
-import { useState } from 'react';
-import { TransactionType } from '../lib/types';
+import { useState, useEffect } from 'react';
+import { TransactionType, Category } from '@/lib/types';
 
 export default function TransactionForm({ onAdd }: { onAdd: (transaction: any) => void }) {
   const [type, setType] = useState<TransactionType>('expense');
-  const [category, setCategory] = useState('');
   const [amount, setAmount] = useState('');
   const [note, setNote] = useState('');
+  const [category, setCategory] = useState('');
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [date, setDate] = useState(() => new Date().toISOString().split('T')[0]);
+
+
+  useEffect(() => {
+    const storedCategories = localStorage.getItem('categories');
+    if (storedCategories) {
+      setCategories(JSON.parse(storedCategories));
+    }
+  }, []);
+
+  const filteredCategories = categories.filter(cat => cat.type === type);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,14 +42,12 @@ export default function TransactionForm({ onAdd }: { onAdd: (transaction: any) =
         <option value="expense">Chi tiêu</option>
       </select>
 
-      <input
-        required
-        type="text"
-        value={category}
-        onChange={(e) => setCategory(e.target.value)}
-        placeholder="Danh mục"
-        className="w-full border rounded p-2 mb-3"
-      />
+      <select value={category} required onChange={(e) => setCategory(e.target.value)} className="w-full border rounded p-2 mb-3">
+        <option value="">Chọn danh mục</option>
+        {filteredCategories.map(cat => (
+          <option key={cat.id} value={cat.name}>{cat.name}</option>
+        ))}
+      </select>
 
       <input
         required
@@ -51,13 +61,17 @@ export default function TransactionForm({ onAdd }: { onAdd: (transaction: any) =
       <textarea
         value={note}
         onChange={(e) => setNote(e.target.value)}
-        placeholder="Ghi chú (không bắt buộc)"
+        placeholder="Ghi chú"
         className="w-full border rounded p-2 mb-3"
       />
-
-      <button className="w-full bg-blue-500 text-white py-2 rounded">
-        Thêm giao dịch
-      </button>
+      <input
+        required
+        type="date"
+        value={date}
+        onChange={(e) => setDate(e.target.value)}
+        className="w-full border rounded p-2 mb-3"
+      />
+      <button className="w-full bg-blue-500 text-white py-2 rounded">Thêm giao dịch</button>
     </form>
   );
 }
