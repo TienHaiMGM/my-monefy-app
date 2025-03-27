@@ -1,20 +1,39 @@
-// app/page.tsx
+"use client";
 
-import Link from 'next/link';
+import { useEffect, useState } from 'react';
+import { Transaction } from '@/lib/types';
 
-export default function HomePage() {
+export default function Dashboard() {
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+
+  useEffect(() => {
+    const stored = localStorage.getItem('transactions');
+    if (stored) setTransactions(JSON.parse(stored));
+  }, []);
+
+  const month = new Date().toISOString().slice(0, 7);
+  const monthlyTransactions = transactions.filter(tx => tx.date.startsWith(month));
+
+  const totalIncome = monthlyTransactions
+    .filter(tx => tx.type === 'income')
+    .reduce((sum, tx) => sum + tx.amount, 0);
+
+  const totalExpense = monthlyTransactions
+    .filter(tx => tx.type === 'expense')
+    .reduce((sum, tx) => sum + tx.amount, 0);
+
   return (
-    <div className="space-y-6">
-      <h1 className="text-3xl font-bold">👋 Chào mừng đến MyFinance!</h1>
+    <div className="space-y-4">
+      <h1 className="text-2xl font-bold">Dashboard tháng {month}</h1>
       <div className="grid md:grid-cols-2 gap-6">
-        <Link href="/transactions" className="bg-white rounded-lg shadow p-6 hover:shadow-md">
-          <h2 className="text-xl font-semibold">💳 Giao dịch</h2>
-          <p>Quản lý thu nhập và chi tiêu của bạn.</p>
-        </Link>
-        <Link href="/categories" className="bg-white rounded-lg shadow p-6 hover:shadow-md">
-          <h2 className="text-xl font-semibold">📂 Danh mục</h2>
-          <p>Quản lý các danh mục thu nhập và chi tiêu.</p>
-        </Link>
+        <div className="bg-green-100 p-6 rounded-lg">
+          <p className="text-xl">💰 Thu nhập tháng này</p>
+          <p className="text-2xl font-semibold">{totalIncome.toLocaleString()}₫</p>
+        </div>
+        <div className="bg-red-100 p-6 rounded-lg">
+          <p className="text-xl">💸 Chi tiêu tháng này</p>
+          <p className="text-2xl font-semibold">{totalExpense.toLocaleString()}₫</p>
+        </div>
       </div>
     </div>
   );

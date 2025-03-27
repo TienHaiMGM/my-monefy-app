@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { TransactionType, Category } from '@/lib/types';
+import { getCategories } from '@/lib/api';
 
 export default function TransactionForm({ onAdd }: { onAdd: (transaction: any) => void }) {
   const [type, setType] = useState<TransactionType>('expense');
@@ -12,28 +13,33 @@ export default function TransactionForm({ onAdd }: { onAdd: (transaction: any) =
   const [date, setDate] = useState(() => new Date().toISOString().split('T')[0]);
 
 
-  useEffect(() => {
-    const storedCategories = localStorage.getItem('categories');
-    if (storedCategories) {
-      setCategories(JSON.parse(storedCategories));
-    }
-  }, []);
-
-  const filteredCategories = categories.filter(cat => cat.type === type);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onAdd({
-      id: crypto.randomUUID(),
-      type,
-      category,
-      amount: parseFloat(amount),
-      date: new Date().toISOString(),
-      note,
-    });
-    setAmount('');
-    setNote('');
+ // Lấy danh mục từ Supabase mỗi khi chọn type (income/expense)
+ useEffect(() => {
+  const fetchCategories = async () => {
+    const data = await getCategories();
+    setCategories(data);
   };
+  fetchCategories();
+}, []);
+
+// Lọc danh mục theo type
+const filteredCategories = categories.filter(cat => cat.type === type);
+
+const handleSubmit = (e: React.FormEvent) => {
+  e.preventDefault();
+  onAdd({
+    id: crypto.randomUUID(),
+    type,
+    category,
+    amount: parseFloat(amount),
+    date,
+    note,
+  });
+  setAmount('');
+  setNote('');
+  setCategory('');
+};
+
 
   return (
     <form onSubmit={handleSubmit} className="bg-white rounded-lg p-6 shadow-md">

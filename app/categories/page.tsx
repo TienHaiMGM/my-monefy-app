@@ -4,27 +4,29 @@ import { useState, useEffect } from 'react';
 import CategoryList from '@/components/CategoryList';
 import CategoryForm from '@/components/CategoryForm';
 import { Category } from '@/lib/types';
+import { getCategories, addCategory, deleteCategory } from '@/lib/api';
+
 
 export default function CategoriesPage() {
   const [categories, setCategories] = useState<Category[]>([]);
 
-  useEffect(() => {
-    const storedCategories = localStorage.getItem('categories');
-    if (storedCategories) {
-      setCategories(JSON.parse(storedCategories));
-    }
-  }, []);
-
-  useEffect(() => {
-    localStorage.setItem('categories', JSON.stringify(categories));
-  }, [categories]);
-
-  const handleAddCategory = (category: Category) => {
-    setCategories(prev => [category, ...prev]);
+  const fetchCategories = async () => {
+    const data = await getCategories();
+    setCategories(data);
   };
 
-  const handleDeleteCategory = (id: string) => {
-    setCategories(prev => prev.filter(cat => cat.id !== id));
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  const handleAddCategory = async (category: Category) => {
+    await addCategory(category);
+    fetchCategories();
+  };
+
+  const handleDeleteCategory = async (id: string) => {
+    await deleteCategory(id);
+    fetchCategories();
   };
 
   return (

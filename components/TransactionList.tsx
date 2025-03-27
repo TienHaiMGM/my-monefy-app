@@ -1,6 +1,6 @@
 "use client";
-
 import { Transaction } from '@/lib/types';
+import { useState } from 'react';
 
 interface Props {
   transactions: Transaction[];
@@ -8,8 +8,12 @@ interface Props {
 }
 
 export default function TransactionList({ transactions, onDelete }: Props) {
-  const incomes = transactions.filter(tx => tx.type === 'income');
-  const expenses = transactions.filter(tx => tx.type === 'expense');
+  const [month, setMonth] = useState(new Date().toISOString().slice(0, 7));
+
+  const filteredTransactions = transactions.filter(tx => tx.date.startsWith(month));
+
+  const incomes = filteredTransactions.filter(tx => tx.type === 'income');
+  const expenses = filteredTransactions.filter(tx => tx.type === 'expense');
 
   const totalIncome = incomes.reduce((sum, tx) => sum + tx.amount, 0);
   const totalExpense = expenses.reduce((sum, tx) => sum + tx.amount, 0);
@@ -19,17 +23,12 @@ export default function TransactionList({ transactions, onDelete }: Props) {
       {list.map(tx => (
         <li key={tx.id} className="flex justify-between items-center border-b py-2">
           <div>
-            <p className="font-medium">{tx.category}</p>
-            <p className="text-xs text-gray-400">{new Date(tx.date).toLocaleDateString()}</p>
+            <p>{tx.category}</p>
+            <p className="text-xs text-gray-400">{tx.date}</p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex gap-2 items-center">
             <span>{tx.amount.toLocaleString()}₫</span>
-            <button
-              onClick={() => onDelete(tx.id)}
-              className="text-red-500 hover:text-red-700"
-            >
-              Xóa
-            </button>
+            <button onClick={() => onDelete(tx.id)} className="text-red-500">Xóa</button>
           </div>
         </li>
       ))}
@@ -37,24 +36,24 @@ export default function TransactionList({ transactions, onDelete }: Props) {
   );
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      {/* Cột Thu nhập */}
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <h2 className="text-xl font-semibold text-green-600 mb-4">Thu nhập</h2>
-        {renderList(incomes)}
-        <div className="border-t pt-4 mt-4 text-green-600 font-semibold text-right">
-          Tổng Thu nhập: {totalIncome.toLocaleString()}₫
+    <>
+      <div className="grid md:grid-cols-2 gap-6">
+        <div className="bg-white rounded shadow p-4">
+          <h2 className="text-green-600 font-semibold mb-2">Thu nhập</h2>
+          {renderList(incomes)}
+          <div className="border-t mt-3 pt-3 font-semibold text-green-600 text-right">
+            Tổng: {totalIncome.toLocaleString()}₫
+          </div>
         </div>
-      </div>
 
-      {/* Cột Chi tiêu */}
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <h2 className="text-xl font-semibold text-red-500 mb-4">Chi tiêu</h2>
-        {renderList(expenses)}
-        <div className="border-t pt-4 mt-4 text-red-500 font-semibold text-right">
-          Tổng Chi tiêu: {totalExpense.toLocaleString()}₫
+        <div className="bg-white rounded shadow p-4">
+          <h2 className="text-red-500 font-semibold mb-2">Chi tiêu</h2>
+          {renderList(expenses)}
+          <div className="border-t mt-3 pt-3 font-semibold text-red-500 text-right">
+            Tổng: {totalExpense.toLocaleString()}₫
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
