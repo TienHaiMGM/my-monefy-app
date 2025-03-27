@@ -1,5 +1,6 @@
 "use client";
 import { Transaction } from '@/lib/types';
+import Link from 'next/link';
 import { useState } from 'react';
 
 interface Props {
@@ -28,6 +29,7 @@ export default function TransactionList({ transactions, onDelete }: Props) {
           </div>
           <div className="flex gap-2 items-center">
             <span>{tx.amount.toLocaleString()}₫</span>
+            <Link href={`/transactions/edit/${tx.id}`} className="text-indigo-500 hover:text-indigo-700">Sửa</Link>
             <button onClick={() => onDelete(tx.id)} className="text-red-500">Xóa</button>
           </div>
         </li>
