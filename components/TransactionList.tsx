@@ -6,9 +6,10 @@ import { useState } from 'react';
 interface Props {
   transactions: Transaction[];
   onDelete: (id: string) => void;
+  onEdit: (tx:Transaction) => void;
 }
 
-export default function TransactionList({ transactions, onDelete }: Props) {
+export default function TransactionList({ transactions, onDelete,onEdit }: Props) {
   const [month, setMonth] = useState(new Date().toISOString().slice(0, 7));
 
   const filteredTransactions = transactions.filter(tx => tx.date.startsWith(month));
@@ -29,7 +30,7 @@ export default function TransactionList({ transactions, onDelete }: Props) {
           </div>
           <div className="flex gap-2 items-center">
             <span>{tx.amount.toLocaleString()}₫</span>
-            <Link href={`/transactions/edit/${tx.id}`} className="text-indigo-500 hover:text-indigo-700">Sửa</Link>
+            <button onClick={() => onEdit(tx)} className="text-indigo-500 hover:text-indigo-700">Sửa</button>
             <button onClick={() => onDelete(tx.id)} className="text-red-500">Xóa</button>
           </div>
         </li>

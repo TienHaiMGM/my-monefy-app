@@ -33,6 +33,7 @@ export default function RootLayout({
           <div className="flex gap-4">
             <NavLink  href="/" >Dashboard</NavLink >
              <NavLink  href="/transactions" >Giao dịch</NavLink >
+             <NavLink href="/statistics">Thống kê</NavLink>
             <NavLink  href="/categories" >Danh mục</NavLink >
           </div>
         </div>
