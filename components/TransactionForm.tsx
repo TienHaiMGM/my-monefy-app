@@ -26,7 +26,25 @@ export default function TransactionForm({ initialData, onSubmit, onCancel }: Pro
     fetchCategories();
   }, []);
 
-  const filteredCategories = categories.filter(cat => cat.type === type);
+  useEffect(() => {
+    if (initialData) {
+      setType(initialData.type);
+      setAmount(initialData.amount.toString());
+      setNote(initialData.note || '');
+      setDate(initialData.date);
+      setCategory(initialData.category);
+    } else {
+      resetForm();
+    }
+  }, [initialData]);
+
+  const resetForm = () => {
+    setType('expense');
+    setAmount('');
+    setNote('');
+    setDate(new Date().toISOString().split('T')[0]);
+    setCategory('');
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,10 +56,10 @@ export default function TransactionForm({ initialData, onSubmit, onCancel }: Pro
       date,
       note,
     });
-    setAmount('');
-    setNote('');
-    setCategory('');
+    resetForm();
   };
+
+  const filteredCategories = categories.filter(cat => cat.type === type);
 
   return (
     <form onSubmit={handleSubmit} className="bg-white rounded-lg p-6 shadow-md space-y-3">
