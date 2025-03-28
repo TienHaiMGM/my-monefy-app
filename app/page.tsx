@@ -1,26 +1,41 @@
-"use client";
+'use client'
 
-import { useEffect, useState } from 'react';
-import { Transaction } from '@/lib/types';
+import { useEffect, useState } from 'react'
+import { supabase } from '@/lib/supabase'
+import { Transaction } from '@/lib/types'
 
 export default function Dashboard() {
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [transactions, setTransactions] = useState<Transaction[]>([])
 
   useEffect(() => {
-    const stored = localStorage.getItem('transactions');
-    if (stored) setTransactions(JSON.parse(stored));
-  }, []);
+    const fetchData = async () => {
+      const { data, error } = await supabase
+        .from('transactions')
+        .select('*')
 
-  const month = new Date().toISOString().slice(0, 7);
-  const monthlyTransactions = transactions.filter(tx => tx.date.startsWith(month));
+      if (error) {
+        console.error('Lỗi Supabase:', error)
+        return
+      }
+
+      if (data) {
+        setTransactions(data as Transaction[])
+      }
+    }
+
+    fetchData()
+  }, [])
+
+  const month = new Date().toISOString().slice(0, 7)
+  const monthlyTransactions = transactions.filter(tx => tx.date.startsWith(month))
 
   const totalIncome = monthlyTransactions
     .filter(tx => tx.type === 'income')
-    .reduce((sum, tx) => sum + tx.amount, 0);
+    .reduce((sum, tx) => sum + tx.amount, 0)
 
   const totalExpense = monthlyTransactions
     .filter(tx => tx.type === 'expense')
-    .reduce((sum, tx) => sum + tx.amount, 0);
+    .reduce((sum, tx) => sum + tx.amount, 0)
 
   return (
     <div className="space-y-4">
@@ -36,5 +51,5 @@ export default function Dashboard() {
         </div>
       </div>
     </div>
-  );
+  )
 }

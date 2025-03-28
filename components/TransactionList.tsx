@@ -28,6 +28,13 @@ export default function TransactionList({ transactions, onDelete, onEdit }: Prop
     setSelectedCategory(category);
     setIsModalOpen(true);
   };
+  const totalIncome = Object.values(groupedTransactions)
+  .filter(g => g.type === 'income')
+  .reduce((sum, g) => sum + g.total, 0);
+
+const totalExpense = Object.values(groupedTransactions)
+  .filter(g => g.type === 'expense')
+  .reduce((sum, g) => sum + g.total, 0);
 
   return (
     <>
@@ -65,6 +72,10 @@ export default function TransactionList({ transactions, onDelete, onEdit }: Prop
                   </li>
                 ))}
             </ul>
+            {/* Tổng cộng ở cuối cột */}
+           <div className={`mt-4 pt-3 border-t text-right font-semibold ${type === 'income' ? 'text-green-600' : 'text-red-500'}`}>
+             Tổng {type === 'income' ? 'thu nhập' : 'chi tiêu'}: {(type === 'income' ? totalIncome : totalExpense).toLocaleString()}₫
+            </div>
           </div>
         ))}
       </div>

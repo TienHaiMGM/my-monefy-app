@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { getCategories } from '@/lib/api';
 import { TransactionType, Category, Transaction } from '@/lib/types';
+import { formatCurrency, parseCurrency } from '@/lib/utils';
 
 interface Props {
   initialData?: Transaction;
@@ -62,71 +63,98 @@ export default function TransactionForm({ initialData, onSubmit, onCancel }: Pro
   const filteredCategories = categories.filter(cat => cat.type === type);
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white rounded-lg p-6 shadow-md space-y-3">
-      <select
-        value={type}
-        onChange={(e) => {
-          setType(e.target.value as TransactionType);
-          setCategory('');
-        }}
-        className="w-full border rounded p-2"
-      >
-        <option value="income">Thu nhập</option>
-        <option value="expense">Chi tiêu</option>
-      </select>
-
-      <select
-        value={category}
-        required
-        onChange={(e) => setCategory(e.target.value)}
-        className="w-full border rounded p-2"
-      >
-        <option value="">Chọn danh mục</option>
-        {filteredCategories.map(cat => (
-          <option key={cat.id} value={cat.name}>
-            {cat.name}
-          </option>
-        ))}
-      </select>
-
-      <input
-        required
-        type="number"
-        value={amount}
-        onChange={(e) => setAmount(e.target.value)}
-        placeholder="Số tiền"
-        className="w-full border rounded p-2"
-      />
-
-      <input
-        required
-        type="date"
-        value={date}
-        onChange={(e) => setDate(e.target.value)}
-        className="w-full border rounded p-2"
-      />
-
-      <textarea
-        value={note}
-        onChange={(e) => setNote(e.target.value)}
-        placeholder="Ghi chú"
-        className="w-full border rounded p-2"
-      />
-
-      <div className="flex gap-2">
-        <button className="flex-1 bg-blue-500 text-white py-2 rounded">
-          {initialData ? "Cập nhật giao dịch" : "Thêm giao dịch"}
-        </button>
-        {initialData && (
-          <button
-            type="button"
-            onClick={onCancel}
-            className="flex-1 bg-gray-200 py-2 rounded"
-          >
-            Hủy
-          </button>
-        )}
+    <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-lg p-6 space-y-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div>
+        <label className="block font-medium text-gray-700">Loại giao dịch</label>
+        <select
+          value={type}
+          onChange={(e) => setType(e.target.value as TransactionType)}
+          className="w-full border rounded-md p-2"
+        >
+          <option value="income">Thu nhập 💰</option>
+          <option value="expense">Chi tiêu 💸</option>
+        </select>
       </div>
-    </form>
-  );
+
+      <div>
+        <label className="block font-medium text-gray-700">Danh mục</label>
+        <select
+          value={category}
+          required
+          onChange={(e) => setCategory(e.target.value)}
+          className="w-full border rounded-md p-2"
+        >
+          <option value="">Chọn danh mục</option>
+          {filteredCategories.map(cat => (
+            <option key={cat.id} value={cat.name}>
+              {cat.name}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div>
+      <label className="block font-medium text-gray-700">Số tiền (₫)</label>
+      <input
+        required
+        inputMode="numeric"
+        value={formatCurrency(amount)}
+        onChange={(e) => setAmount(parseCurrency(e.target.value))}
+        placeholder="Ví dụ: 500,000"
+        className="w-full border rounded-md p-2"
+      />
+      {/* Gợi ý nhập nhanh */}
+      <div className="flex flex-wrap gap-2 mt-2">
+        {[100000, 200000, 500000, 1000000, 5000000].map((suggestion) => (
+          <button
+            key={suggestion}
+            type="button"
+            onClick={() => setAmount(suggestion.toString())}
+            className="bg-gray-100 hover:bg-gray-200 text-sm px-3 py-1 rounded-full"
+          >
+            {suggestion.toLocaleString('vi-VN')}₫
+          </button>
+        ))}
+      </div>
+      </div>
+
+      <div>
+        <label className="block font-medium text-gray-700">Ngày giao dịch</label>
+        <input
+          required
+          type="date"
+          value={date}
+          onChange={(e) => setDate(e.target.value)}
+          className="w-full border rounded-md p-2"
+        />
+      </div>
+
+      <div className="md:col-span-2">
+        <label className="block font-medium text-gray-700">Ghi chú</label>
+        <textarea
+          value={note}
+          onChange={(e) => setNote(e.target.value)}
+          placeholder="Ghi chú thêm (nếu có)..."
+          className="w-full border rounded-md p-2"
+        />
+      </div>
+    </div>
+
+    <div className="flex gap-3">
+      <button className="bg-indigo-500 hover:bg-indigo-600 text-white py-2 px-4 rounded-md flex-1">
+        {initialData ? "Cập nhật giao dịch" : "Thêm giao dịch"}
+      </button>
+      {initialData && (
+        <button
+          type="button"
+          onClick={onCancel}
+          className="bg-gray-200 hover:bg-gray-300 py-2 px-4 rounded-md flex-1"
+        >
+          Hủy
+        </button>
+      )}
+    </div>
+  </form>
+);
 }
