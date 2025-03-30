@@ -62,3 +62,51 @@ export const updateTransaction = async (id: string, transaction: Partial<Transac
   
     if (error) throw error;
   };
+
+  export const getBudgetByMonth = async (month: string) => {
+    const { data, error } = await supabase
+      .from('budgets')
+      .select('*')
+      .eq('month', month)
+      .single();
+    if (error) return null;
+    return data;
+  };
+  
+  export const upsertBudget = async (month: string, budget_limit: number, saving_goal: number) => {
+    const { error } = await supabase.from('budgets').upsert({
+      month,
+      budget_limit,
+      saving_goal,
+    });
+    if (error) throw error;
+  };
+  
+
+  // lib/api.ts
+export async function saveAdvice(prompt: string, response: string) {
+  await supabase.from('advice_history').insert([{ prompt, response }]);
+}
+type AdviceItem = {
+  id: string;
+  prompt: string;
+  response: string;
+  created_at: string;
+};
+export async function getAdviceHistory(): Promise<AdviceItem[]> {
+  const { data, error } = await supabase
+    .from('advice_history')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (error) throw error;
+  return data ?? []; // ✅ đảm bảo luôn trả về array
+}
+
+export async function deleteAdvice(id: string) {
+  const { error } = await supabase
+    .from('advice_history')
+    .delete()
+    .eq('id', id);
+  if (error) throw error;
+}

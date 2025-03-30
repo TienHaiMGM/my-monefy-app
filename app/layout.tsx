@@ -35,6 +35,8 @@ export default function RootLayout({
              <NavLink  href="/transactions" >Giao dịch</NavLink >
              <NavLink href="/statistics">Thống kê</NavLink>
             <NavLink  href="/categories" >Danh mục</NavLink >
+            <NavLink  href="/budgets" >Ngân sách chi tiêu</NavLink >
+            <NavLink  href="/advisor" >AI</NavLink >
           </div>
         </div>
       </nav>

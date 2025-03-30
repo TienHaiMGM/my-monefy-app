@@ -18,6 +18,8 @@ export default function TransactionForm({ initialData, onSubmit, onCancel }: Pro
   const [date, setDate] = useState(initialData?.date || new Date().toISOString().split('T')[0]);
   const [category, setCategory] = useState(initialData?.category || '');
   const [categories, setCategories] = useState<Category[]>([]);
+  const [emotion, setEmotion] = useState<'happy' | 'neutral' | 'sad'>('neutral');
+
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -56,6 +58,7 @@ export default function TransactionForm({ initialData, onSubmit, onCancel }: Pro
       amount: parseFloat(amount),
       date,
       note,
+      emotion,
     });
     resetForm();
   };
@@ -138,6 +141,28 @@ export default function TransactionForm({ initialData, onSubmit, onCancel }: Pro
           placeholder="Ghi chú thêm (nếu có)..."
           className="w-full border rounded-md p-2"
         />
+      </div>
+    </div>
+
+    <div>
+      <label className="block font-medium text-gray-700">Cảm xúc</label>
+      <div className="flex gap-3 mt-1">
+        {[
+          { label: '😄 Vui vẻ', value: 'happy' },
+          { label: '😐 Bình thường', value: 'neutral' },
+          { label: '😞 Hối hận', value: 'sad' }
+        ].map(({ label, value }) => (
+          <button
+            key={value}
+            type="button"
+            onClick={() => setEmotion(value as any)}
+            className={`px-3 py-1 rounded-full border ${
+              emotion === value ? 'bg-blue-500 text-white' : 'bg-gray-100'
+            }`}
+          >
+            {label}
+          </button>
+        ))}
       </div>
     </div>
 

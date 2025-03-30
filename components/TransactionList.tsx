@@ -1,8 +1,9 @@
 // components/TransactionList.tsx
 "use client";
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Transaction } from '@/lib/types';
 import Modal from './Modal';
+import { formatCurrency, formatCurrencyNumber } from '@/lib/utils';
 
 interface Props {
   transactions: Transaction[];
@@ -13,6 +14,10 @@ interface Props {
 export default function TransactionList({ transactions, onDelete, onEdit }: Props) {
   const [selectedCategory, setSelectedCategory] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [typeFilter, setTypeFilter] = useState<'all' | 'income' | 'expense'>('all');
+  const [minAmount, setMinAmount] = useState('');
+  const [maxAmount, setMaxAmount] = useState('');
 
   // Gộp giao dịch theo danh mục
   const groupedTransactions = transactions.reduce((acc, tx) => {
@@ -36,6 +41,22 @@ const totalExpense = Object.values(groupedTransactions)
   .filter(g => g.type === 'expense')
   .reduce((sum, g) => sum + g.total, 0);
 
+
+   // ✅ Lọc giao dịch dựa trên từ khóa và điều kiện
+   const filteredTransactions = useMemo(() => {
+    return transactions.filter(tx => {
+      const matchKeyword =
+        tx.note?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        tx.category?.toLowerCase().includes(searchTerm.toLowerCase());
+
+      const matchType = typeFilter === 'all' || tx.type === typeFilter;
+
+      const matchMin = minAmount ? tx.amount >= parseFloat(minAmount) : true;
+      const matchMax = maxAmount ? tx.amount <= parseFloat(maxAmount) : true;
+
+      return matchKeyword && matchType && matchMin && matchMax;
+    });
+  }, [transactions, searchTerm, typeFilter, minAmount, maxAmount]);
   return (
     <>
       <div className="grid md:grid-cols-2 gap-6">
@@ -53,7 +74,7 @@ const totalExpense = Object.values(groupedTransactions)
                       {category} ({val.items.length})
                     </button>
                     <div className="flex items-center gap-3">
-                      <span>{val.total.toLocaleString()}₫</span>
+                      <span>{formatCurrencyNumber(val.total)}₫</span>
                       {/* Nút sửa (edit giao dịch đầu tiên) */}
                       <button
                         onClick={() => onEdit(val.items[0])}
@@ -78,6 +99,72 @@ const totalExpense = Object.values(groupedTransactions)
             </div>
           </div>
         ))}
+      </div>
+      <div className="space-y-4">
+        {/* 🔍 Bộ lọc tìm kiếm */}
+        <div className="grid md:grid-cols-4 gap-3 bg-white p-4 rounded-lg shadow">
+          <input
+            type="text"
+            placeholder="Tìm theo ghi chú hoặc danh mục..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="border p-2 rounded col-span-2"
+          />
+          <select
+            value={typeFilter}
+            onChange={(e) => setTypeFilter(e.target.value as 'all' | 'income' | 'expense')}
+            className="border p-2 rounded"
+          >
+            <option value="all">Tất cả</option>
+            <option value="income">Thu nhập</option>
+            <option value="expense">Chi tiêu</option>
+          </select>
+          <div className="flex gap-2">
+            <input
+              type="number"
+              placeholder="Từ ₫"
+              value={minAmount}
+              onChange={(e) => setMinAmount(e.target.value)}
+              className="border p-2 rounded w-full"
+            />
+            <input
+              type="number"
+              placeholder="Đến ₫"
+              value={maxAmount}
+              onChange={(e) => setMaxAmount(e.target.value)}
+              className="border p-2 rounded w-full"
+            />
+          </div>
+        </div>
+
+        {/* Danh sách giao dịch đã lọc */}
+        {filteredTransactions.length === 0 ? (
+          <p className="text-center text-gray-500">Không tìm thấy giao dịch phù hợp.</p>
+        ) : (
+          <ul className="space-y-2">
+            {filteredTransactions.map(tx => (
+              <li
+                key={tx.id}
+                className="bg-white p-4 rounded-lg shadow flex justify-between items-center"
+              >
+                <div>
+                  <p className="font-semibold">{tx.category}</p>
+                  <p className="text-sm text-gray-500">{tx.note}</p>
+                  <p className="text-xs text-gray-400">{tx.date}</p>
+                </div>
+                <div className="text-right">
+                  <p className={`font-bold ${tx.type === 'income' ? 'text-green-600' : 'text-red-500'}`}>
+                    {tx.amount.toLocaleString()}₫
+                  </p>
+                  <div className="flex gap-2 mt-1 justify-end">
+                    <button onClick={() => onEdit(tx)} className="text-indigo-500">Sửa</button>
+                    <button onClick={() => onDelete(tx.id)} className="text-red-500">Xóa</button>
+                  </div>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
 
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>

@@ -5,6 +5,7 @@ export interface Transaction {
     amount: number;
     date: string; // ISO string
     note?: string;
+    emotion?:'happy' | 'neutral' | 'sad';
   }
 
  export type TransactionType = 'income' | 'expense';
