@@ -74,7 +74,7 @@ const totalExpense = Object.values(groupedTransactions)
                       {category} ({val.items.length})
                     </button>
                     <div className="flex items-center gap-3">
-                      <span>{formatCurrencyNumber(val.total)}₫</span>
+                      <span>{formatCurrencyNumber(val.total)}</span>
                       {/* Nút sửa (edit giao dịch đầu tiên) */}
                       <button
                         onClick={() => onEdit(val.items[0])}

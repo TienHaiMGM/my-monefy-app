@@ -109,7 +109,7 @@ export default function TransactionForm({ initialData, onSubmit, onCancel }: Pro
       />
       {/* Gợi ý nhập nhanh */}
       <div className="flex flex-wrap gap-2 mt-2">
-        {[100000, 200000, 500000, 1000000, 5000000].map((suggestion) => (
+        {[20000, 30000, 50000, 100000, 500000].map((suggestion) => (
           <button
             key={suggestion}
             type="button"
